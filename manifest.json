@@ -1,0 +1,106 @@
+{
+  "version": "1.1",
+  "notes": "# 1.1\n- **CUSTOM CODE mode** — new button in the header. Turn it ON and build your own server: write features in `resources/core` (server/client/UI) — updates will never overwrite your code. Majestic platform files (server binaries, modules) keep updating as usual. Turning it OFF returns full updates and replaces changed code with the released version.\n\n# 1.0\n- First release — welcome!\n- **In-game dev HUD**: chat with command suggestions (`/` + **Tab**, arrow-up history, Russian layout recognized), red alert for unknown/failed commands, M menu, clothes debug board, makeup studio with a fully frozen ped, noclip, photo mode, prop attach, draggable and scalable interface, Roboto Mono everywhere\n- **Server Manager**: drag & drop DLC packs (rename / disable / delete), facial_overlays.meta upload and delete, server start/stop with colored log\n- **Updates**: when a new version is out the header blinks green **UPDATE** — click it, read the notes, press **UPDATE NOW**. Server binaries update remotely too, no reinstall\n- **Installer**: one file, pick a folder — everything downloads from GitHub\n",
+  "files": [
+    {
+      "path": "resources/core/client/index.js",
+      "sha256": "af8f910bd346213916b829a5d0d6e88307a89225fe8b7f613dc6aa1aef486e9e",
+      "size": 51124
+    },
+    {
+      "path": "resources/core/resource.toml",
+      "sha256": "273dc9f8f574a1d57b0b06a30fda1248efa820cc045eeaa8f02ad06e47c783b2",
+      "size": 111
+    },
+    {
+      "path": "resources/core/server/index.js",
+      "sha256": "3d7b9a6a0034461b2f66edceb33f74bad5f44d6a19938b91b0482a75fc850e8d",
+      "size": 29235
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-cyr-ext.woff2",
+      "sha256": "6d72c2150c28b5305e7bfd0290edcf6038e556a9dd11a6ef15a1652548a35693",
+      "size": 35912
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-cyr.woff2",
+      "sha256": "4052cc0b0f8b1b39da6cfaf90460f8b3c84dfc4b7562e9308ffa0998c3b9a005",
+      "size": 18592
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-latin-ext.woff2",
+      "sha256": "4cc0d52e0fa37c28084e0cbce3589a8ab32dd21e6ea619489c5f7c6e8c43b922",
+      "size": 22916
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-latin.woff2",
+      "sha256": "b81cd55177300649be8f95b3b747d721ce607e8ed2856e25bd0c630cfd631faf",
+      "size": 32796
+    },
+    {
+      "path": "resources/core/ui/hud.css",
+      "sha256": "00a669c2a23ff236f7caab427d79b45fbbb88180155a37eaac4395fd21015a59",
+      "size": 12516
+    },
+    {
+      "path": "resources/core/ui/hud.html",
+      "sha256": "f9b7d29dad8ab98f12d110e073370022f10fecc7eaa2c585eee52e0f1c57e969",
+      "size": 2648
+    },
+    {
+      "path": "resources/core/ui/hud.js",
+      "sha256": "0c019e4ee5f0f80f450a087d0361145e9a23eedfe0c4d1b5228897bc5e1bc92e",
+      "size": 63438
+    },
+    {
+      "path": "manager/launcher.mjs",
+      "sha256": "3db903ed2a963c70a551ce11472674fb37c79822ce0f905bc669ddbfa8391af4",
+      "size": 26670
+    },
+    {
+      "path": "manager/ui.html",
+      "sha256": "10e888fe974b3b9f19cd90309134a8fcc94f38d4acd16f498ca3a34286e65191",
+      "size": 30875
+    },
+    {
+      "path": "manager/run-hidden.vbs",
+      "sha256": "65740b1583bc3cd69b189ae7fea30219ff1d9212a4284430408fdc73f45cc934",
+      "size": 604
+    },
+    {
+      "path": "manager/icon.ico",
+      "sha256": "68bec997c8a9eba8cd0a1cb406afbe30e6da0e53640d7577d7d7b0afe1957a9b",
+      "size": 1942
+    },
+    {
+      "path": "manager/app/main.cjs",
+      "sha256": "66eaf28c8922b9e5aa275f50f1800ce05d5bac6b51e62dd959ebcff4af43dedd",
+      "size": 2744
+    },
+    {
+      "path": "manager/app/package.json",
+      "sha256": "9d74a8e9c32d5af2d91854e43fddfc3e3c95dc22df21db10304a83af8948d232",
+      "size": 75
+    },
+    {
+      "path": "server/release/x64_win32/majestic-server.exe",
+      "sha256": "282a6f0665b7008b2e74faf3258d19547b2b7af39a812297e8a4b7a6528faae9",
+      "size": 6754568
+    },
+    {
+      "path": "server/release/x64_win32/majestic-crash-handler.exe",
+      "sha256": "98fee052c9d05ba63b1eae8626924edf9410ca16e42806a41629145bcdba108c",
+      "size": 703488
+    },
+    {
+      "path": "modules/js-module/js-module.dll",
+      "sha256": "9a25ad35617ddb3e585a22277726056a71923163bcdd018ce4e74711a1ffe73d",
+      "size": 1757184
+    },
+    {
+      "path": "modules/js-module/libnode.dll",
+      "sha256": "1abfb13ec290940983df53321a59980f23165ac3e080d870a5ed928ce9f7800d",
+      "size": 95573504
+    }
+  ]
+}

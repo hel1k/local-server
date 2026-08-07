@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ru" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<title>Server Manager</title>
+<style>
+/* Roboto Mono — локальные woff2 из resources/core/ui/fonts, отдаёт лончер */
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 100 700;
+    src: url('/fonts/robotomono-cyr-ext.woff2') format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 100 700;
+    src: url('/fonts/robotomono-cyr.woff2') format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 100 700;
+    src: url('/fonts/robotomono-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 100 700;
+    src: url('/fonts/robotomono-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* стиль как у игрового HUD: чёрный/серый/белый, панели с заголовком-полоской */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --bg: #0b0b0d;
+    --panel: rgba(20, 20, 23, 0.96);
+    --border: rgba(255, 255, 255, 0.14);
+    --border-strong: rgba(255, 255, 255, 0.3);
+    --text: #f5f5f7;
+    --muted: #a1a1a6;
+    --fill: rgba(255, 255, 255, 0.08);
+    --fill-hover: rgba(255, 255, 255, 0.16);
+    --ok: #4ade80;
+}
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 15px;
+    min-height: 100vh;
+    padding: 24px 28px;
+}
+.mono { font-family: 'Roboto Mono', 'Consolas', monospace; }
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 20px;
+    padding: 12px 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+h1 {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+h1 span { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0.3px; }
+#updstate { text-transform: none; letter-spacing: 0.3px; }
+/* доступно обновление — мигаем зелёным, по клику окно с ноутами и кнопкой UPDATE */
+#updstate.avail { color: var(--ok); cursor: pointer; animation: updblink 1.1s ease-in-out infinite; }
+#updstate.err { color: #f87171; }
+#btn-mode.on { color: var(--ok); border-color: rgba(74, 222, 128, 0.5); }
+@keyframes updblink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* подпись автора в углу */
+#madeby {
+    position: fixed;
+    right: 16px;
+    bottom: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    opacity: 0.6;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+#madeby:hover { color: #ffffff; opacity: 1; }
+
+.srv { display: flex; align-items: center; gap: 12px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #52525b; }
+.dot.on { background: var(--ok); box-shadow: 0 0 8px rgba(74, 222, 128, 0.6); }
+
+button {
+    background: var(--fill);
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 7px 16px;
+    cursor: pointer;
+}
+button:hover { background: var(--fill-hover); }
+button.small { padding: 2px 10px; font-size: 12px; border-radius: 6px; letter-spacing: 0.5px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.zone {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-height: 140px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.zone.drag { border-color: #ffffff; box-shadow: 0 0 0 1.5px #ffffff; }
+.zone h2 {
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.zone .hint { padding: 8px 16px 0; font-size: 12.5px; color: var(--muted); opacity: 0.8; }
+.zone .packs { padding: 8px 16px 14px; }
+
+.pack {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: 0 8px 8px 0;
+    margin-top: 6px;
+    background: rgba(11, 11, 13, 0.6);
+}
+.pack .nm { font-size: 14px; color: #ffffff; }
+.pack .sz { color: var(--muted); font-size: 12px; font-family: 'Roboto Mono', 'Consolas', monospace; }
+.pack .wl { color: var(--muted); font-size: 11px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pack.off { opacity: 0.45; }
+.pack.off { border-left-color: var(--border); }
+.pack .st { font-size: 11px; letter-spacing: 1px; color: var(--ok); min-width: 26px; }
+.pack.off .st { color: var(--muted); }
+
+#logwrap {
+    grid-column: 1 / -1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+#logwrap h2 {
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+#logbox {
+    padding: 12px 16px;
+    max-height: 240px;
+    overflow-y: auto;
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--muted);
+    white-space: pre-wrap;
+}
+#logbox::-webkit-scrollbar { width: 6px; }
+#logbox::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+#logbox .lg-ok { color: #6ee7a0; }
+#logbox .lg-bad { color: #f08c8c; }
+#logbox .lg-warn { color: #d6c078; }
+
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 9px 20px;
+    font-size: 14px;
+    display: none;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+progress { width: calc(100% - 32px); margin: 8px 16px; height: 5px; }
+
+/* модалка имени пака — как командная строка в игре */
+#modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+#modal {
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    width: 480px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+#modal h3 {
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+#modal .inner { padding: 16px 18px 18px; }
+#modal .file { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; }
+#modal label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+#modal input {
+    width: 100%;
+    background: rgba(11, 11, 13, 0.8);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 15px;
+    padding: 9px 12px;
+    outline: none;
+}
+#modal input:focus { border-color: #ffffff; }
+#modal .warn { font-size: 12.5px; color: var(--muted); min-height: 18px; margin-top: 8px; }
+#modal .warn.bad { color: #f87171; }
+#modal .btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+
+/* окно патч-ноутов (PATCHNOTES.md): само при новой версии + кнопка WHAT'S NEW */
+#wn-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+#wn {
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    width: 560px;
+    max-height: 74vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+#wn h3 {
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+#wn h3 b { color: #4ade80; }
+#wn-body { padding: 14px 20px; overflow-y: auto; font-size: 13.5px; line-height: 1.6; }
+#wn-body .wn-h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin: 14px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+#wn-body .wn-h1:first-child { margin-top: 0; }
+#wn-body .wn-h2, #wn-body .wn-h3 { font-weight: 600; margin: 10px 0 4px; color: var(--muted); }
+#wn-body ul { margin: 4px 0 8px; padding-left: 20px; }
+#wn-body li { margin: 3px 0; }
+#wn-body code {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: inherit;
+}
+#wn-body p { margin: 6px 0; }
+#wn .btns { display: flex; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<header>
+    <h1>Server Manager <span>— drop .rpf into a section</span><br>
+        <span id="updstate" style="font-size:12px">updates: ...</span></h1>
+    <div class="srv">
+        <button id="btn-mode" style="display:none" title="Write your own server features — updates stop touching your code, platform binaries still update">CUSTOM CODE: OFF</button>
+        <button id="btn-notes" style="display:none">WHAT'S NEW</button>
+        <div class="dot" id="dot"></div>
+        <span id="srvstate" class="mono">checking...</span>
+        <button id="btn-start">START SERVER</button>
+        <button id="btn-stop">STOP</button>
+        <button id="btn-quit" title="Close manager">QUIT</button>
+    </div>
+</header>
+
+<div id="wn-bg">
+    <div id="wn">
+        <h3>WHAT'S NEW <b id="wn-ver"></b></h3>
+        <div id="wn-body"></div>
+        <div class="btns"><button id="wn-upd" style="display:none">UPDATE NOW</button><button id="wn-ok">GOT IT</button></div>
+    </div>
+</div>
+
+<div class="wrap" id="zones"></div>
+<a id="madeby" href="https://t.me/hel1k" target="_blank" rel="noopener">made by helik</a>
+<div id="toast"></div>
+
+<div id="modal-bg">
+    <div id="modal">
+        <h3>Install pack</h3>
+        <div class="inner">
+            <div class="file" id="modal-file"></div>
+            <label>Folder name (resources/dlc/&lt;name&gt;/dlc.rpf)</label>
+            <input id="modal-name" spellcheck="false" autocomplete="off">
+            <div class="warn" id="modal-warn"></div>
+            <div class="btns">
+                <button id="modal-cancel">CANCEL</button>
+                <button id="modal-ok">INSTALL</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const CATEGORIES = [
+    ['clothes', 'Clothes', 'packs with drawables — items appear in /debug lists'],
+    ['makeup', 'Makeup', 'drop the pack .rpf AND facial_overlays.meta here (meta registers the styles)'],
+    ['tattoos', 'Tattoos', 'tattoo overlay packs'],
+    ['props', 'Props / objects', 'addon props and objects'],
+    ['other', 'Other', 'anything else (maps, weapons...)'],
+];
+
+const zones = document.getElementById('zones');
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+
+function toast(t) {
+    toastEl.textContent = t;
+    toastEl.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.style.display = 'none'; }, 3500);
+}
+
+function fmtSize(b) {
+    return b > 1e9 ? (b / 1e9).toFixed(2) + ' GB' : (b / 1e6).toFixed(1) + ' MB';
+}
+
+for (const [key, title, hint] of CATEGORIES) {
+    const z = document.createElement('div');
+    z.className = 'zone';
+    z.id = 'zone-' + key;
+    z.innerHTML = '<h2>' + title + '</h2><div class="hint">' + hint + '</div><div class="packs"></div>';
+    z.addEventListener('dragover', (e) => { e.preventDefault(); z.classList.add('drag'); });
+    z.addEventListener('dragleave', () => z.classList.remove('drag'));
+    z.addEventListener('drop', (e) => {
+        e.preventDefault();
+        z.classList.remove('drag');
+        if (!e.dataTransfer.files.length) { toast('Nothing dropped — drop the .rpf FILE itself'); return; }
+        for (const file of e.dataTransfer.files) {
+            // в Makeup можно кидать и facial_overlays.meta — реестр стилей
+            if (key === 'makeup' && /\.meta$/i.test(file.name)) {
+                uploadMeta(file);
+                continue;
+            }
+            if (!/\.rpf$/i.test(file.name)) {
+                toast(file.name + ': only .rpf files' + (file.type === '' && file.size % 4096 === 0 ? ' (folders cannot be dropped — open it and drop dlc.rpf)' : ''));
+                continue;
+            }
+            uploadQueue.push({ file, category: key });
+        }
+        processQueue();
+    });
+    zones.appendChild(z);
+}
+
+async function uploadMeta(file) {
+    toast('Uploading ' + file.name + '...');
+    try {
+        const r = await fetch('/meta', { method: 'POST', body: file });
+        const j = await r.json();
+        if (j.ok) toast('facial_overlays.meta installed — ' + j.items + ' styles');
+        else toast('Meta rejected: ' + (j.error || 'unknown'));
+    } catch (err) {
+        toast('Meta upload failed: ' + err.message);
+    }
+    refresh();
+}
+
+// ---- очередь заливок: на каждый файл спрашиваем имя папки ----
+
+const uploadQueue = [];
+let modalBusy = false;
+let existingNames = [];
+
+const modalBg = document.getElementById('modal-bg');
+const modalName = document.getElementById('modal-name');
+const modalWarn = document.getElementById('modal-warn');
+
+function sanitizeName(v) {
+    return v.toLowerCase().replace(/\.rpf$/, '').replace(/[^a-z0-9_]/g, '_').slice(0, 64);
+}
+
+function checkName() {
+    const v = modalName.value;
+    if (!v) {
+        modalWarn.textContent = 'Enter a folder name';
+        modalWarn.className = 'warn bad';
+        return false;
+    }
+    if (existingNames.includes(v)) {
+        modalWarn.textContent = 'Pack "' + v + '" already exists — it will be OVERWRITTEN';
+        modalWarn.className = 'warn bad';
+        return true; // разрешаем, но предупреждаем
+    }
+    modalWarn.textContent = 'Will be stored until you delete it here';
+    modalWarn.className = 'warn';
+    return true;
+}
+
+modalName.addEventListener('input', () => {
+    const clean = sanitizeName(modalName.value);
+    if (modalName.value !== clean) modalName.value = clean;
+    checkName();
+});
+
+function askModal({ title, info, initial, okLabel }) {
+    return new Promise((resolve) => {
+        document.querySelector('#modal h3').textContent = title;
+        document.getElementById('modal-ok').textContent = okLabel || 'OK';
+        document.getElementById('modal-file').textContent = info;
+        modalName.value = sanitizeName(initial);
+        checkName();
+        modalBg.style.display = 'flex';
+        setTimeout(() => { modalName.focus(); modalName.select(); }, 0);
+
+        const done = (val) => {
+            modalBg.style.display = 'none';
+            document.getElementById('modal-ok').onclick = null;
+            document.getElementById('modal-cancel').onclick = null;
+            modalName.onkeydown = null;
+            resolve(val);
+        };
+        document.getElementById('modal-ok').onclick = () => {
+            if (checkName() && modalName.value) done(modalName.value);
+        };
+        document.getElementById('modal-cancel').onclick = () => done(null);
+        modalName.onkeydown = (e) => {
+            if (e.key === 'Enter' && checkName() && modalName.value) done(modalName.value);
+            if (e.key === 'Escape') done(null);
+        };
+    });
+}
+
+function askName(file, category) {
+    return askModal({
+        title: 'Install pack',
+        info: file.name + ' (' + fmtSize(file.size) + ') → ' + category,
+        initial: file.name,
+        okLabel: 'INSTALL',
+    });
+}
+
+async function processQueue() {
+    if (modalBusy) return;
+    modalBusy = true;
+    try {
+        while (uploadQueue.length) {
+            const { file, category } = uploadQueue.shift();
+            try {
+                const name = await askName(file, category);
+                if (!name) { toast('Skipped: ' + file.name); continue; }
+                const zone = document.getElementById('zone-' + category);
+                const prog = document.createElement('progress');
+                zone.appendChild(prog);
+                toast('Uploading ' + file.name + ' → ' + name + ' (' + fmtSize(file.size) + ')...');
+                try {
+                    const r = await fetch('/upload?category=' + category + '&name=' + encodeURIComponent(name), {
+                        method: 'POST',
+                        body: file,
+                    });
+                    const j = await r.json();
+                    if (j.ok) toast('Installed: ' + j.name + ' — whitelist: ' + j.whitelist.join(', '));
+                    else toast('Upload failed: ' + (j.error || 'unknown'));
+                } catch (err) {
+                    toast('Upload failed: ' + err.message);
+                }
+                prog.remove();
+                await refresh();
+            } catch (err) {
+                // одна сломавшаяся заливка не должна вешать всю очередь
+                toast('Error: ' + err.message);
+            }
+        }
+    } finally {
+        modalBusy = false;
+    }
+}
+
+// любая необработанная ошибка страницы — в тост, а не в тишину
+window.addEventListener('error', (e) => toast('UI error: ' + e.message));
+window.addEventListener('unhandledrejection', (e) => toast('UI error: ' + (e.reason?.message || e.reason)));
+
+const logwrap = document.createElement('div');
+logwrap.id = 'logwrap';
+logwrap.innerHTML = '<h2>Server log</h2>';
+const logbox = document.createElement('div');
+logbox.id = 'logbox';
+logbox.textContent = 'server log...';
+logwrap.appendChild(logbox);
+zones.appendChild(logwrap);
+
+const UI_VERSION = '__UIV__'; // вшивается сервером при отдаче страницы
+
+async function refresh() {
+    try {
+        const s = await (await fetch('/state')).json();
+        // на диске более новый интерфейс — перезагружаемся сами
+        if (s.uiVersion && UI_VERSION !== '__UIV' + '__' && s.uiVersion !== UI_VERSION) {
+            location.href = '/?t=' + Date.now();
+            return;
+        }
+        existingNames = s.packs.map((p) => p.name);
+        document.getElementById('dot').className = 'dot' + (s.running ? ' on' : '');
+        document.getElementById('srvstate').textContent = s.running ? 'running :7788' : 'stopped';
+        const u = s.update || {};
+        // кастом-режим: код получателя не обновляется, платформа — да
+        currentCustom = !!u.custom;
+        const bm = document.getElementById('btn-mode');
+        bm.style.display = '';
+        bm.textContent = 'CUSTOM CODE: ' + (currentCustom ? 'ON' : 'OFF');
+        bm.classList.toggle('on', currentCustom);
+        const us = document.getElementById('updstate');
+        us.classList.remove('avail', 'err');
+        if (u.state === 'available') {
+            us.classList.add('avail');
+            us.textContent = (currentCustom ? 'PLATFORM UPDATE v' : 'UPDATE v') + u.version + ' available — click to view';
+        } else if (u.state === 'applying') {
+            us.classList.add('avail');
+            us.textContent = 'updating: ' + u.detail;
+        } else if (u.state === 'error') {
+            us.classList.add('err');
+            us.textContent = 'updates: error — ' + u.detail;
+        } else if (u.state === 'ok' || u.state === 'applied') {
+            us.textContent = 'updates: ' + (u.version ? 'v' + u.version + ' — ' : '') + u.detail;
+        } else {
+            us.textContent = 'updates: ' + (u.detail || u.state || 'off');
+        }
+        // патч-ноуты из PATCHNOTES.md: кнопка в шапке всегда, если ноуты есть;
+        // окно само открывается после установки обновления — раз на версию
+        if (u.notes && u.version) {
+            wnData = u;
+            document.getElementById('btn-notes').style.display = '';
+            if ((u.state === 'ok' || u.state === 'applied') &&
+                localStorage.getItem('notesSeen') !== String(u.version)) openNotes();
+        }
+        const mkHint = document.querySelector('#zone-makeup .hint');
+        mkHint.textContent = s.facialMeta
+            ? 'facial_overlays.meta: ' + s.facialMeta.items + ' styles registered — drop a new .meta to replace'
+            : 'facial_overlays.meta NOT FOUND — drop it here (styles will not register without it)';
+        // мета — тоже файл: рядом кнопка удаления
+        if (s.facialMeta) {
+            const del = document.createElement('button');
+            del.className = 'small';
+            del.textContent = 'DELETE';
+            del.style.marginLeft = '10px';
+            del.onclick = async () => {
+                if (!confirm('Delete facial_overlays.meta? Makeup styles will not register without it.')) return;
+                await fetch('/meta/delete', { method: 'POST' });
+                toast('facial_overlays.meta deleted');
+                refresh();
+            };
+            mkHint.appendChild(del);
+        }
+        for (const [key] of CATEGORIES) {
+            document.querySelector('#zone-' + key + ' .packs').innerHTML = '';
+        }
+        for (const p of s.packs) {
+            const holder = document.querySelector('#zone-' + (CATEGORIES.some(c => c[0] === p.category) ? p.category : 'other') + ' .packs');
+            const row = document.createElement('div');
+            row.className = 'pack' + (p.enabled ? '' : ' off');
+            row.innerHTML =
+                '<span class="st">' + (p.enabled ? 'ON' : 'OFF') + '</span>' +
+                '<span class="nm mono">' + p.name + '</span>' +
+                '<span class="sz">' + fmtSize(p.size) + '</span>' +
+                '<span class="wl" title="' + p.whitelist.join(', ') + '">' + p.whitelist.join(', ') + '</span>';
+            const ren = document.createElement('button');
+            ren.className = 'small';
+            ren.textContent = 'RENAME';
+            ren.onclick = async () => {
+                const to = await askModal({
+                    title: 'Rename pack',
+                    info: p.name + ' → new folder name (dlc.rpf stays in place)',
+                    initial: p.name,
+                    okLabel: 'RENAME',
+                });
+                if (!to || to === p.name) return;
+                const r = await fetch('/rename?name=' + p.name + '&to=' + to, { method: 'POST' });
+                const j = await r.json();
+                toast(j.ok ? 'Renamed: ' + p.name + ' → ' + to : 'Rename failed: ' + (j.error || 'unknown'));
+                refresh();
+            };
+            const tog = document.createElement('button');
+            tog.className = 'small';
+            tog.textContent = p.enabled ? 'DISABLE' : 'ENABLE';
+            tog.onclick = async () => { await fetch('/toggle?name=' + p.name, { method: 'POST' }); refresh(); };
+            const del = document.createElement('button');
+            del.className = 'small';
+            del.textContent = 'DELETE';
+            del.onclick = async () => {
+                if (!confirm('Delete pack ' + p.name + '?')) return;
+                await fetch('/delete?name=' + p.name, { method: 'POST' });
+                refresh();
+            };
+            row.appendChild(ren);
+            row.appendChild(tog);
+            row.appendChild(del);
+            holder.appendChild(row);
+        }
+    } catch (e) { /* менеджер перезапускается */ }
+}
+
+function logLineClass(line) {
+    if (/\[Error\]|Exception|FAILED|Failed|[1-9]\d* failed|Corrupt|corrupt|Crash|crash/.test(line)) return 'lg-bad';
+    if (/\[Warning\]|<< DISCONNECTED/.test(line)) return 'lg-warn';
+    if (/pack OK|>> CONNECTED|Loaded resource|0 failed|resource started|Server started/.test(line)) return 'lg-ok';
+    return '';
+}
+
+async function refreshLog() {
+    try {
+        const j = await (await fetch('/log')).json();
+        const atBottom = logbox.scrollTop + logbox.clientHeight >= logbox.scrollHeight - 20;
+        logbox.innerHTML = '';
+        if (!j.lines.length || (j.lines.length === 1 && !j.lines[0])) {
+            logbox.textContent = 'server log is empty';
+        } else {
+            for (const line of j.lines) {
+                if (!line) continue;
+                const div = document.createElement('div');
+                div.className = logLineClass(line);
+                div.textContent = line;
+                logbox.appendChild(div);
+            }
+        }
+        if (atBottom) logbox.scrollTop = logbox.scrollHeight;
+    } catch (e) { /* пусто */ }
+}
+
+document.getElementById('btn-start').onclick = async () => {
+    await fetch('/server/start', { method: 'POST' });
+    toast('Server starting...');
+    setTimeout(refresh, 1500);
+};
+document.getElementById('btn-stop').onclick = async () => {
+    await fetch('/server/stop', { method: 'POST' });
+    toast('Server stopped');
+    setTimeout(refresh, 800);
+};
+// ---- кастом-режим: свой код против моих апдейтов ----
+let currentCustom = false;
+
+document.getElementById('btn-mode').onclick = async () => {
+    const turnOn = !currentCustom;
+    const msg = turnOn
+        ? 'Enable CUSTOM CODE mode?\n\nBuild your own server: updates will NEVER touch your code (resources/core, manager UI).\nMajestic platform files (server binaries, modules) keep updating as usual.\n\nYou can turn this off anytime.'
+        : 'Disable CUSTOM CODE mode?\n\nWARNING: the next update will OVERWRITE all code you changed (resources/core, manager files) with the released versions. Your custom features will be lost.';
+    if (!confirm(msg)) return;
+    await fetch('/custommode?on=' + (turnOn ? '1' : '0'), { method: 'POST' });
+    toast(turnOn ? 'Custom code mode ON — your code is yours now' : 'Custom code mode OFF — full updates restored');
+    setTimeout(refresh, 600);
+};
+
+// ---- патч-ноуты: markdown из манифеста -> окно ----
+let wnData = null;
+
+// мини-markdown: #/##/### заголовки, - списки, **жирный**, `код`; html экранируется
+function mdRender(md) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inline = (s) => esc(s)
+        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+    const out = [];
+    let inList = false;
+    const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+    for (const raw of String(md).split(/\r?\n/)) {
+        const line = raw.trimEnd();
+        const h = line.match(/^(#{1,3})\s+(.*)/);
+        if (h) {
+            closeList();
+            out.push('<div class="wn-h' + h[1].length + '">' + inline(h[2]) + '</div>');
+        } else if (/^[-*]\s+/.test(line)) {
+            if (!inList) { out.push('<ul>'); inList = true; }
+            out.push('<li>' + inline(line.replace(/^[-*]\s+/, '')) + '</li>');
+        } else if (line.trim() === '') {
+            closeList();
+        } else {
+            closeList();
+            out.push('<p>' + inline(line) + '</p>');
+        }
+    }
+    closeList();
+    return out.join('');
+}
+
+function openNotes() {
+    if (!wnData) return;
+    document.getElementById('wn-ver').textContent = 'v' + wnData.version;
+    document.getElementById('wn-body').innerHTML = mdRender(wnData.notes);
+    // доступно обновление — предлагаем поставить прямо из окна
+    const avail = wnData.state === 'available';
+    document.getElementById('wn-upd').style.display = avail ? '' : 'none';
+    document.getElementById('wn-ok').textContent = avail ? 'LATER' : 'GOT IT';
+    document.getElementById('wn-bg').style.display = 'flex';
+}
+
+function closeNotes() {
+    // пока обновление не поставлено — «прочитанным» не считаем (индикатор мигает дальше)
+    if (wnData && wnData.state !== 'available') localStorage.setItem('notesSeen', String(wnData.version));
+    document.getElementById('wn-bg').style.display = 'none';
+}
+
+document.getElementById('btn-notes').onclick = openNotes;
+document.getElementById('updstate').onclick = () => { if (wnData) openNotes(); };
+document.getElementById('wn-ok').onclick = closeNotes;
+document.getElementById('wn-bg').onclick = (e) => { if (e.target === document.getElementById('wn-bg')) closeNotes(); };
+document.getElementById('wn-upd').onclick = async () => {
+    document.getElementById('wn-bg').style.display = 'none';
+    await fetch('/update/apply', { method: 'POST' });
+    toast('Updating...');
+    setTimeout(refresh, 800);
+};
+document.getElementById('btn-quit').onclick = async () => {
+    if (!confirm('Close Server Manager AND stop the server?')) return;
+    quitting = true;
+    try { await fetch('/quit', { method: 'POST' }); } catch (e) { /* уже умер */ }
+    window.close();
+    document.body.innerHTML = '<p style="padding:40px;color:#a1a1a6">Manager closed — you can close this window.</p>';
+};
+
+// закрытие окна крестиком: предупреждаем бэкенд (он погасит сервер и выйдет)
+let quitting = false;
+window.addEventListener('pagehide', () => {
+    if (quitting) return;
+    try { navigator.sendBeacon('/window-closed', ''); } catch (e) { /* пусто */ }
+});
+
+refresh();
+refreshLog();
+setInterval(refresh, 3000);
+setInterval(refreshLog, 2000);
+</script>
+</body>
+</html>
