@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>core hud</title>
+<link rel="stylesheet" href="hud.css">
+</head>
+<body>
+    <!-- координаты + производительность -->
+    <div id="topright">
+        <div id="coords">
+            <span class="k">X</span><span class="v" id="cx">0.00</span>
+            <span class="k">Y</span><span class="v" id="cy">0.00</span>
+            <span class="k">Z</span><span class="v" id="cz">0.00</span>
+            <span class="k">H</span><span class="v" id="ch">0</span>
+            <span class="copyhint"><kbd>F6</kbd></span>
+        </div>
+        <div id="stats">
+            <span class="k">FPS</span><span class="v" id="fps">0</span>
+            <span class="k">MS</span><span class="v" id="ms">0.0</span>
+            <span class="k">PING</span><span class="v" id="ping">—</span>
+        </div>
+    </div>
+
+    <!-- лог чата -->
+    <div id="chatlog"></div>
+
+    <!-- красный алерт: команда не найдена / упала -->
+    <div id="cmdalert" class="hidden"></div>
+
+    <!-- командная строка -->
+    <div id="chatinput" class="hidden">
+        <span class="prompt">&gt;</span>
+        <input id="chatfield" type="text" maxlength="256" spellcheck="false" autocomplete="off">
+        <div id="chatsug" class="hidden"></div>
+    </div>
+
+    <!-- меню -->
+    <div id="menu" class="hidden">
+        <div id="menu-title">МЕНЮ</div>
+        <div id="menu-items"></div>
+        <div id="menu-foot"></div>
+    </div>
+
+    <!-- доска дебага одежды: все категории сразу, панельки таскаются -->
+    <div id="clothboard" class="hidden">
+        <div id="board-top">
+            <span id="board-title">CLOTHES DEBUG</span>
+            <button id="board-lock">LOCKED</button>
+            <button id="board-reset">RESET OUTFIT</button>
+            <button id="board-layout">RESET LAYOUT</button>
+        </div>
+    </div>
+
+    <!-- бейджи активных режимов -->
+    <div id="modes"></div>
+
+    <!-- список команд (кнопка справа внизу, клик — при курсоре ~) -->
+    <div id="cmdbtn">CMDS</div>
+    <div id="cmdpanel" class="hidden">
+        <div id="cmdpanel-title">COMMANDS <span class="cmd-hint">click to type</span></div>
+        <div id="cmdlist"></div>
+    </div>
+
+    <!-- подсказки снизу -->
+    <div id="hints"></div>
+
+    <!-- тост -->
+    <div id="toast" class="hidden"></div>
+
+    <textarea id="clip" tabindex="-1"></textarea>
+    <script src="hud.js"></script>
+</body>
+</html>

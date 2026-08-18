@@ -1,0 +1,126 @@
+{
+  "version": "1.06",
+  "notes": "# 1.06\n- Majestic platform update: new server build + js-module (matches client **1.19.9**). Press UPDATE and you're on the current version — no reinstall\n\n# 1.05\n- Hair bases: the **tint now applies live** — turn Hair color and the fade recolors instantly, no need to scroll the decal back and forth\n- Fixed: changing appearance while the hairstyle is hidden no longer brings the hair back over the fade\n\n# 1.04\n- Fixed: with the debug board open, **T and M stopped working** — the board is an overlay now, so chat and the menu open over it as usual (that's how you reach \"Close clothes debug\")\n\n# 1.03\n- **Clothes debug board is now a toggle**: `/debug` opens it and it stays open — through chat, through the M menu, while you walk around. `/debug` again (or **Close clothes debug**, shown in red in the menu once it's open) closes it. Pressing Esc on the board just releases the cursor so you can move, the board stays\n- Tattoo browser: **Hair: shown / hidden** switch — check a hair base with and without the hairstyle, and see how the tint colors it (hair is hidden automatically when you enter the Hair base category)\n- **Encrypted packs are read now** (NG and AES): tattoos, hair bases and the real DLC name are picked up from any pack, not just from unencrypted ones — no more repacking by hand\n- **Everything is written automatically before each server start**: the manager rebuilds `dlcWhitelist` in server.toml from the packs you actually have (using the DLC name from setup2, which is what the engine requires) and prepares the decorations catalog for the server. Drop a pack — press START — it works\n- **Closing the manager now really closes everything**: QUIT, the window X, Alt+F4 — the game server is killed and the manager leaves no background process behind (the watchdog used to be disabled in the desktop app, so a backend could hang around)\n- **DLC validator**: every pack is checked before the server starts — valid packs show green `pack OK (encryption, entries, size)`, broken/unreadable ones show red `ERROR READING` with the reason and are auto-disabled so the server still boots (a corrupt archive used to kill it silently)\n- Tattoo browser: the ped now **undresses while you browse** (clothes come back when you leave the menu), and in the Hair base category the hairstyle is removed too — fades were drawn under the hair, that's why they seemed invisible\n- New `/creator` command — jumps straight into the appearance creator\n- Custom tattoo/hair-base packs are now read properly: the scanner parses the RPF table of contents and decompresses the overlays XML (packs built with compression were silently ignored), and both `GENDER_MALE` and plain `MALE` formats are recognized\n\n# 1.02\n- **Tattoos & hair bases** — new M-menu section: browse all 1691 vanilla tattoos by body zone with live preview, plus 195 hair base decals (the fade layers under hairstyles). Add/remove/clear, saved with your outfit per gender\n- Custom packs with tattoos/overlays are picked up automatically and appear in the same browser\n- Weapons: **Custom hash...** — spawn any weapon by name, decimal or 0x hash\n- Makeup studio: **Eye color (lens)** — all 32 native lens variants, applied instantly and saved with your outfit\n- Makeup studio: **mouse wheel** now zooms the camera in and out (Q/E still work)\n- `/gender` is now a simple toggle — just type it to switch to the opposite gender, no more `m`/`f` argument (the M menu has a single \"Switch gender\" entry too)\n\n# 1.01\n- **CUSTOM CODE mode** — new button in the header. Turn it ON and build your own server: write features in `resources/core` (server/client/UI) — updates will never overwrite your code. Majestic platform files (server binaries, modules) keep updating as usual. Turning it OFF returns full updates and replaces changed code with the released version.\n\n# 1.0\n- First release — welcome!\n- **In-game dev HUD**: chat with command suggestions (`/` + **Tab**, arrow-up history, Russian layout recognized), red alert for unknown/failed commands, M menu, clothes debug board, makeup studio with a fully frozen ped, noclip, photo mode, prop attach, draggable and scalable interface, Roboto Mono everywhere\n- **Server Manager**: drag & drop DLC packs (rename / disable / delete), facial_overlays.meta upload and delete, server start/stop with colored log\n- **Updates**: when a new version is out the header blinks green **UPDATE** — click it, read the notes, press **UPDATE NOW**. Server binaries update remotely too, no reinstall\n- **Installer**: one file, pick a folder — everything downloads from GitHub\n",
+  "files": [
+    {
+      "path": "resources/core/client/index.js",
+      "sha256": "50cd6c66735de58a0ceb92759d9158dc996eb5c863dbd218d7afe8b5cd21120b",
+      "size": 58422
+    },
+    {
+      "path": "resources/core/client/tattoocatalog.js",
+      "sha256": "150dc179fdd1daa9862e1906336e335097dfa57ae6e1af2c541526073d97bc08",
+      "size": 137188
+    },
+    {
+      "path": "resources/core/resource.toml",
+      "sha256": "273dc9f8f574a1d57b0b06a30fda1248efa820cc045eeaa8f02ad06e47c783b2",
+      "size": 111
+    },
+    {
+      "path": "resources/core/server/index.js",
+      "sha256": "4bf9876893745e1a0295560afb221a2c0a414f940192e943dfeed54a4461671a",
+      "size": 40452
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-cyr-ext.woff2",
+      "sha256": "6d72c2150c28b5305e7bfd0290edcf6038e556a9dd11a6ef15a1652548a35693",
+      "size": 35912
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-cyr.woff2",
+      "sha256": "4052cc0b0f8b1b39da6cfaf90460f8b3c84dfc4b7562e9308ffa0998c3b9a005",
+      "size": 18592
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-latin-ext.woff2",
+      "sha256": "4cc0d52e0fa37c28084e0cbce3589a8ab32dd21e6ea619489c5f7c6e8c43b922",
+      "size": 22916
+    },
+    {
+      "path": "resources/core/ui/fonts/robotomono-latin.woff2",
+      "sha256": "b81cd55177300649be8f95b3b747d721ce607e8ed2856e25bd0c630cfd631faf",
+      "size": 32796
+    },
+    {
+      "path": "resources/core/ui/hud.css",
+      "sha256": "00a669c2a23ff236f7caab427d79b45fbbb88180155a37eaac4395fd21015a59",
+      "size": 12516
+    },
+    {
+      "path": "resources/core/ui/hud.html",
+      "sha256": "f9b7d29dad8ab98f12d110e073370022f10fecc7eaa2c585eee52e0f1c57e969",
+      "size": 2648
+    },
+    {
+      "path": "resources/core/ui/hud.js",
+      "sha256": "fee3e5050c37cab73a2535bbdfa47cc4c500e5804d160cf1db3733200174e663",
+      "size": 70703
+    },
+    {
+      "path": "manager/launcher.mjs",
+      "sha256": "e8bbafc1ea41f659b63156fd1a9f09435af0d488f33ceb0b5999d307a3fc09f9",
+      "size": 44183
+    },
+    {
+      "path": "manager/ui.html",
+      "sha256": "4607f192567776fd766b6c3387928ccfc28f201ac45c630e15d16edde53517d5",
+      "size": 31286
+    },
+    {
+      "path": "manager/run-hidden.vbs",
+      "sha256": "65740b1583bc3cd69b189ae7fea30219ff1d9212a4284430408fdc73f45cc934",
+      "size": 604
+    },
+    {
+      "path": "manager/icon.ico",
+      "sha256": "68bec997c8a9eba8cd0a1cb406afbe30e6da0e53640d7577d7d7b0afe1957a9b",
+      "size": 1942
+    },
+    {
+      "path": "manager/app/main.cjs",
+      "sha256": "190e962d25fe5c087ce7ee65db87504cfa1646985154c90ada06c9dfeeed122b",
+      "size": 3828
+    },
+    {
+      "path": "manager/app/package.json",
+      "sha256": "9d74a8e9c32d5af2d91854e43fddfc3e3c95dc22df21db10304a83af8948d232",
+      "size": 75
+    },
+    {
+      "path": "manager/keys/gtav_aes_key.dat",
+      "sha256": "1bc7625fc374717d47fa98c801562180873294a9d9de9eedb18876a208afe077",
+      "size": 32
+    },
+    {
+      "path": "manager/keys/gtav_ng_decrypt_tables.dat",
+      "sha256": "d6fbef9059284a68f617824ea188c74eae11b89f43c68580290f99ce75bb5fee",
+      "size": 278528
+    },
+    {
+      "path": "manager/keys/gtav_ng_key.dat",
+      "sha256": "3c956b6220627e4350fc9a4f6da1c0269a7aac180093992296c892de5057dcf2",
+      "size": 27472
+    },
+    {
+      "path": "server/release/x64_win32/majestic-server.exe",
+      "sha256": "880439ef579a57a84f9c508f97f568059c8faa68bbfd58558c326fa7ed54b779",
+      "size": 7411976
+    },
+    {
+      "path": "server/release/x64_win32/majestic-crash-handler.exe",
+      "sha256": "98fee052c9d05ba63b1eae8626924edf9410ca16e42806a41629145bcdba108c",
+      "size": 703488
+    },
+    {
+      "path": "modules/js-module/js-module.dll",
+      "sha256": "e5130f5f793b558a2923505e213121d16faac7ff2f413aecbe32e05635b98857",
+      "size": 1840128
+    },
+    {
+      "path": "modules/js-module/libnode.dll",
+      "sha256": "1abfb13ec290940983df53321a59980f23165ac3e080d870a5ed928ce9f7800d",
+      "size": 95573504
+    }
+  ]
+}
