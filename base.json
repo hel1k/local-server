@@ -1,0 +1,22 @@
+{
+  "version": "1.06",
+  "zipSize": 245416713,
+  "zipSha256": "532b50dcf2e4e7ec5346d83fccbd159413a14e087418011aac2e7adf489d5b79",
+  "parts": [
+    {
+      "name": "base.zip.part01",
+      "size": 94371840,
+      "sha256": "efc9e6b839f3e0fc0862ea748354119761b86cd4b5282ecd3fcbfcbc9ef7bfe1"
+    },
+    {
+      "name": "base.zip.part02",
+      "size": 94371840,
+      "sha256": "79b609de7c484101c1c1799e0b0c2b2389704becf5d07b1150aab102379d3e73"
+    },
+    {
+      "name": "base.zip.part03",
+      "size": 56673033,
+      "sha256": "e19af7d1fed6c081e74981aad79beebd795c013540e2f2f2e4f873ee031d63d1"
+    }
+  ]
+}
