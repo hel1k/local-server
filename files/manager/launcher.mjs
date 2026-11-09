@@ -20,7 +20,7 @@ const FACIAL_META = path.join(ROOT, 'resources', 'game_data', 'common', 'data', 
 const PORT = Number(process.env.MGR_PORT) || 8600;
 
 // версию зашивает publish.mjs при релизе; в рабочей копии остаётся 'dev'
-const MANAGER_VERSION = '1.11';
+const MANAGER_VERSION = '1.12';
 
 const manifest = fs.existsSync(MANIFEST)
     ? JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
