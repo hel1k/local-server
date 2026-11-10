@@ -1,22 +1,22 @@
 {
-  "version": "1.09",
-  "zipSize": 245439884,
-  "zipSha256": "d21c4b018e4a82b710898ca02e0126a81f73ddaeb743f63a34c80d31a7984e30",
+  "version": "1.12",
+  "zipSize": 251296390,
+  "zipSha256": "7cb217d1ef1df663f7239db59f7f8a95b544fa920169877bbcd523cf9f139c16",
   "parts": [
     {
       "name": "base.zip.part01",
       "size": 94371840,
-      "sha256": "6ea7395f3cf07d002c924e6e2c01c3d9e48196e0fbd8d23af4e2c97cee2b35bf"
+      "sha256": "877eb02d1754c10487a77c0d61391aaef06b0b9bb647299c433cca4a4589d450"
     },
     {
       "name": "base.zip.part02",
       "size": 94371840,
-      "sha256": "2e3fee1604566ed742e3153f58e19d58d415fe3f3e88ceff565b4fd10f9af749"
+      "sha256": "d3cbd8baea252e283dad5bc2dec3d12dbf42702d86e8b6c9d0e028def0632411"
     },
     {
       "name": "base.zip.part03",
-      "size": 56696204,
-      "sha256": "351562f446a6e4089afd92a12bf2841b7043c637207696546c2eaa911fdffdc2"
+      "size": 62552710,
+      "sha256": "c7dbb5b23563baf2636e92c3a99f3080f772f9b6eec6265a115445ecbd447318"
     }
   ]
 }
