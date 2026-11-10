@@ -1344,6 +1344,14 @@ const dbgMap = {}; // key -> { kind, comp, drawable, texture, drawables, texture
 const keyOf = (kind, comp) => `${kind}-${comp}`;
 const BOARD_KEYS = CLOTH_COMPONENTS.map(([k, c]) => keyOf(k, c));
 let stripsBuilt = false;
+let debugRequestId = 0;
+
+function requestClothes(c, drawable, texture) {
+    const info = { ...c, drawable, texture, pending: true, applied: null, error: null, requestId: ++debugRequestId };
+    dbgMap[keyOf(c.kind, c.comp)] = info;
+    renderStrip(keyOf(c.kind, c.comp));
+    A.emit('debug:set', c.kind, c.comp, drawable, texture, info.requestId);
+}
 
 const POS_STORE = 'clothboard-pos-v1';
 let savedPos = {};
@@ -1378,6 +1386,7 @@ A.on('layout:apply', (layout) => {
 
 A.on('debug:info', (info) => {
     const key = keyOf(info.kind, info.comp);
+    if (info.requestId != null && info.requestId < (dbgMap[key]?.requestId ?? 0)) return;
     dbgMap[key] = info;
     renderStrip(key);
 });
@@ -1403,10 +1412,10 @@ function step(key, field, dir) {
     if (!c) return;
     const allowNone = c.kind === 'prop';
     if (field === 'drawable') {
-        A.emit('debug:set', c.kind, c.comp, wrap(c.drawable + dir, c.drawables, allowNone), 0);
+        requestClothes(c, wrap(c.drawable + dir, c.drawables, allowNone), 0);
     } else {
         if (c.drawable < 0) return;
-        A.emit('debug:set', c.kind, c.comp, c.drawable, wrap(c.texture + dir, c.textures, false));
+        requestClothes(c, c.drawable, wrap(c.texture + dir, c.textures, false));
     }
 }
 
@@ -1551,8 +1560,9 @@ function renderStrip(key) {
     if (!c) return;
     const dv = document.getElementById(`d-${key}`);
     const tv = document.getElementById(`t-${key}`);
-    const bad = c.applied === false ? ' !' : '';
+    const bad = c.pending ? ' …' : c.applied === false ? ' !' : '';
     if (dv) dv.textContent = (c.drawable < 0 ? `—/${Math.max(c.drawables - 1, 0)}` : `${c.drawable}/${Math.max(c.drawables - 1, 0)}`) + bad;
+    if (dv) dv.title = c.pending ? 'Loading clothing' : c.error || '';
     if (tv) tv.textContent = `${Math.max(c.texture, 0)}/${Math.max(c.textures - 1, 0)}`;
 }
 
@@ -1590,9 +1600,9 @@ function editValue(key, field, span) {
             if (!Number.isNaN(v)) {
                 if (field === 'drawable') {
                     const min = c.kind === 'prop' ? -1 : 0;
-                    A.emit('debug:set', c.kind, c.comp, Math.max(v, min), 0);
+                    requestClothes(c, Math.min(Math.max(v, min), Math.max(c.drawables - 1, min)), 0);
                 } else if (c.drawable >= 0) {
-                    A.emit('debug:set', c.kind, c.comp, c.drawable, Math.max(v, 0));
+                    requestClothes(c, c.drawable, Math.min(Math.max(v, 0), Math.max(c.textures - 1, 0)));
                 }
             }
         } else if (e.key === 'Escape') {

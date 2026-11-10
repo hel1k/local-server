@@ -1,6 +1,7 @@
 import * as alt from 'alt-client';
 import * as native from 'natives';
 import { TATTOO_CATALOG } from './tattoocatalog.js';
+import { createClothesPreview } from './clothes-preview.js';
 
 const view = new alt.WebView('http://resource/ui/hud.html');
 let uiOpen = false;
@@ -344,7 +345,8 @@ function catInfo(kind, comp) {
         const drawable = native.getPedDrawableVariation(ped(), comp);
         const texture = native.getPedTextureVariation(ped(), comp);
         const drawables = native.getNumberOfPedDrawableVariations(ped(), comp);
-        const textures = native.getNumberOfPedTextureVariations(ped(), comp, drawable);
+        const textures = drawable >= 0 && drawable < drawables
+            ? native.getNumberOfPedTextureVariations(ped(), comp, drawable) : 0;
         return { kind, comp, drawable, texture, drawables, textures };
     }
     const drawable = getPropIndex(comp);
@@ -368,36 +370,36 @@ view.on('debug:selectAll', () => {
     view.emit('debug:infoAll', list);
 });
 
-view.on('debug:set', (kind, comp, drawable, texture) => {
-    // пользователь сам меняет слот — защита сейва этого слота больше не нужна
-    if (kind === 'comp') fallbackComps.delete(comp);
-    else fallbackProps.delete(comp);
-
-    let applied = true;
-    if (kind === 'comp') {
-        native.setPedComponentVariation(ped(), comp, drawable, texture, 2);
-        applied = native.getPedDrawableVariation(ped(), comp) === drawable;
-    } else {
-        setPropIndex(comp, drawable, texture);
-        applied = getPropIndex(comp) === drawable;
-    }
-    // отчёт по ЗАПРОШЕННОМУ индексу — листание не залипает на битых айди,
-    // невалидные просто помечаются в UI восклицательным знаком
-    const info = catInfo(kind, comp);
-    info.drawable = drawable;
-    info.texture = texture;
-    info.applied = applied;
-    if (kind === 'comp' && drawable >= 0) {
-        info.textures = native.getNumberOfPedTextureVariations(ped(), comp, drawable);
-    }
-    view.emit('debug:info', info);
-    scheduleOutfitSave();
+const clothesPreview = createClothesPreview({
+    native, alt, getPed: ped, getModel: () => alt.Player.local.model,
+    trace: (phase, r) => alt.log(`[clothes] ${phase}: ${r.kind} ${r.comp} drawable ${r.drawable} texture ${r.texture} ped ${r.ped} model ${r.model}`),
+    report: (request, status) => {
+        const { kind, comp, drawable, texture, requestId } = request;
+        if (!(kind === 'comp' ? COMPS : kind === 'prop' ? PROPS : []).includes(comp)) return;
+        const info = catInfo(kind, comp);
+        if (Number.isInteger(drawable) && drawable >= 0 && drawable < info.drawables) {
+            info.textures = kind === 'comp'
+                ? native.getNumberOfPedTextureVariations(ped(), comp, drawable)
+                : native.getNumberOfPedPropTextureVariations(ped(), comp, drawable);
+        } else info.textures = 0;
+        view.emit('debug:info', { ...info, drawable, texture, requestId, ...status });
+        if (status.error) alt.logWarning(`[clothes] ${kind} ${comp} drawable ${drawable} texture ${texture}: ${status.error}`);
+    },
+    applied: ({ kind, comp }) => {
+        if (kind === 'comp') fallbackComps.delete(comp);
+        else fallbackProps.delete(comp);
+        scheduleOutfitSave();
+    },
 });
+
+view.on('debug:set', (...args) => clothesPreview.request(...args));
+alt.on('resourceStop', () => clothesPreview.cancel());
 
 // перед перезапуском паков: сначала ФЛАШИМ несохранённые правки одежды
 // (иначе последние 500мс правок теряются), потом снимаем вещи пака
 // (иначе выгрузка rpf крашит игру) и глушим автосохранение до респавна
 alt.onServer('packs:prepareReload', () => {
+    clothesPreview.cancel();
     if (outfitTimer) {
         alt.clearTimeout(outfitTimer);
         outfitTimer = null;
@@ -410,14 +412,7 @@ alt.onServer('packs:prepareReload', () => {
 });
 
 // прямое применение с сервера (/setclothes, /setprop)
-alt.onServer('clothes:set', (kind, comp, drawable, texture) => {
-    if (kind === 'comp') {
-        native.setPedComponentVariation(ped(), comp, drawable, texture, 2);
-    } else {
-        setPropIndex(comp, drawable, texture);
-    }
-    scheduleOutfitSave();
-});
+alt.onServer('clothes:set', (...args) => clothesPreview.request(...args));
 
 // раскладка панелек дебага хранится на сервере (localStorage WebView ненадёжен)
 view.on('layout:save', (layout) => alt.emitServer('layout:save', layout));
@@ -425,6 +420,7 @@ view.on('ui:ready', () => alt.emitServer('layout:request'));
 alt.onServer('layout:apply', (layout) => view.emit('layout:apply', layout));
 
 view.on('debug:reset', () => {
+    clothesPreview.cancel();
     // отменяем висящий автосейв, иначе он через 500мс перезапишет reset
     if (outfitTimer) {
         alt.clearTimeout(outfitTimer);
@@ -853,6 +849,7 @@ function scheduleOutfitSave() {
 // откатываем компонент в дефолт (0/0 — базовая футболка и т.п.)
 alt.onServer('outfit:apply', (outfit) => {
     if (!outfit || !outfit.comps) return;
+    clothesPreview.cancel();
     fallbackComps.clear();
     fallbackProps.clear();
     for (const c of COMPS) {
@@ -890,6 +887,7 @@ alt.onServer('outfit:apply', (outfit) => {
 // после каждого спавна (вход, /gender, респавн) просим сервер вернуть аутфит.
 // Висящий автосейв отменяем: он собран ещё под старую модель/пол
 alt.on('spawned', () => {
+    clothesPreview.cancel();
     if (outfitTimer) {
         alt.clearTimeout(outfitTimer);
         outfitTimer = null;
@@ -1382,6 +1380,6 @@ alt.on('keyup', (key) => {
     }
 });
 
-const CLIENT_BUILD = 'r1.7.7';
+const CLIENT_BUILD = 'r1.7.8';
 alt.log(`[core] client loaded ${CLIENT_BUILD}: T chat, M menu, F5 noclip`);
 alt.setTimeout(() => localMsg(`* core client ${CLIENT_BUILD}`), 2000);

@@ -9,6 +9,7 @@ import { pipeline } from 'stream/promises';
 import { spawn, execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import zlib from 'zlib';
+import { buildDlcWhitelist } from './base-game-dlcs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DLC_DIR = path.join(ROOT, 'resources', 'dlc');
@@ -20,7 +21,7 @@ const FACIAL_META = path.join(ROOT, 'resources', 'game_data', 'common', 'data', 
 const PORT = Number(process.env.MGR_PORT) || 8600;
 
 // версию зашивает publish.mjs при релизе; в рабочей копии остаётся 'dev'
-const MANAGER_VERSION = '1.13';
+const MANAGER_VERSION = '1.14';
 
 const manifest = fs.existsSync(MANIFEST)
     ? JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
@@ -412,17 +413,12 @@ function scanPackDecorations(rpfPath) {
 // Перед КАЖДЫМ стартом: проверяем паки, чиним dlcWhitelist в server.toml под
 // реальный состав папки и складываем каталог декораций в dlccatalog.json —
 // серверу и клиенту остаётся только прочитать готовое
-const BASE_WHITELIST_END = 'patch2023_02'; // последняя запись базовой игры
-
 function writeWhitelist(packNames) {
     try {
         let toml = fs.readFileSync(TOML, 'utf8');
         const m = toml.match(/dlcWhitelist\s*=\s*\[([\s\S]*?)\]/);
         if (!m) return false;
-        const entries = [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
-        const endIdx = entries.indexOf(BASE_WHITELIST_END);
-        const base = endIdx >= 0 ? entries.slice(0, endIdx + 1) : entries;
-        const merged = [...new Set([...base, ...packNames])];
+        const merged = buildDlcWhitelist(packNames);
         const block = 'dlcWhitelist = [\n' + merged.map((n) => `  "${n}"`).join(',\n') + '\n]';
         const next = toml.replace(m[0], block);
         if (next !== toml) fs.writeFileSync(TOML, next);
