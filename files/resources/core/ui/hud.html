@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>core hud</title>
+<link rel="stylesheet" href="hud.css">
+<link rel="stylesheet" href="menu.css">
+<link rel="stylesheet" href="hud-polish.css">
+<link rel="stylesheet" href="panel-layout.css">
+</head>
+<body>
+    <!-- координаты + производительность -->
+    <div id="topright">
+        <div id="coords">
+            <span class="k">X</span><span class="v" id="cx">0.00</span>
+            <span class="k">Y</span><span class="v" id="cy">0.00</span>
+            <span class="k">Z</span><span class="v" id="cz">0.00</span>
+            <span class="k">H</span><span class="v" id="ch">0</span>
+            <span class="copyhint"><kbd>F6</kbd></span>
+        </div>
+        <div id="stats">
+            <span class="k">FPS</span><span class="v" id="fps">0</span>
+            <span class="k">MS</span><span class="v" id="ms">0.0</span>
+            <span class="k">PING</span><span class="v" id="ping">—</span>
+        </div>
+    </div>
+
+    <!-- лог чата -->
+    <div id="chatlog"></div>
+
+    <!-- красный алерт: команда не найдена / упала -->
+    <div id="cmdalert" class="hidden"></div>
+
+    <!-- командная строка -->
+    <div id="chatinput" class="hidden">
+        <span class="prompt">&gt;</span>
+        <input id="chatfield" type="text" maxlength="256" spellcheck="false" autocomplete="off">
+        <div id="chatsug" class="hidden"></div>
+    </div>
+
+    <!-- меню -->
+    <div id="menu" class="studio-shell hidden">
+        <button class="panel-grip" aria-label="Move menu" title="Drag to move. Double-click to reset size and position."></button>
+        <aside class="studio-sidebar">
+            <nav id="menu-nav" class="studio-nav" aria-label="Menu sections"></nav>
+        </aside>
+        <section class="studio-main">
+            <header class="studio-heading"><div id="menu-breadcrumb"></div><h1 id="menu-title">Character</h1></header>
+            <div id="menu-items"></div>
+            <div id="menu-pagination" class="list-pagination hidden"><button id="menu-page-prev" aria-label="Previous page">&larr;</button><span id="menu-page-label"></span><button id="menu-page-next" aria-label="Next page">&rarr;</button></div>
+            <footer class="studio-footer"><span id="menu-foot"></span><div class="footer-actions"><button id="menu-back" class="quiet-button">← Back</button><button id="menu-close" class="primary-button">Close <kbd>Esc</kbd></button></div></footer>
+        </section>
+        <button class="panel-resize" aria-label="Resize menu" title="Drag to resize. Double-click for automatic height."></button>
+    </div>
+
+    <!-- доска дебага одежды: все категории сразу, панельки таскаются -->
+    <div id="clothboard" class="studio-shell hidden">
+        <button class="panel-grip" aria-label="Move clothes panel" title="Drag to move. Double-click to reset size and position."></button>
+        <aside class="studio-sidebar">
+            <nav id="board-nav" class="studio-nav" aria-label="Menu sections"></nav>
+        </aside>
+        <section class="studio-main">
+            <header class="studio-heading" id="board-top"><div class="heading-row"><h1 id="board-title">Clothes</h1><button id="board-view" class="quiet-button" title="Separate panels for detailed inspection">Floating panels</button></div></header>
+            <div class="wardrobe-toolbar"><div class="wardrobe-tabs"><button id="board-comps" class="wardrobe-tab active">Clothes <span>11</span></button><button id="board-props" class="wardrobe-tab">Props <span>5</span></button></div><span class="wardrobe-caption">Click a number to enter an ID</span></div>
+            <div class="wardrobe-columns"><span>Category</span><span>Model</span><span>Texture</span></div>
+            <div id="board-cards" class="wardrobe-grid"></div>
+            <div id="board-pagination" class="list-pagination hidden"><button id="board-page-prev" aria-label="Previous page">&larr;</button><span id="board-page-label"></span><button id="board-page-next" aria-label="Next page">&rarr;</button></div>
+            <footer class="studio-footer wardrobe-footer"><span class="autosave"><i></i>Autosave</span><div class="footer-actions"><button id="board-copy" class="quiet-button">Copy ID</button><button id="board-reset" class="quiet-button danger-button">Reset</button><button id="board-close" class="primary-button">Done <kbd>Esc</kbd></button></div></footer>
+            <div class="floating-tools"><button id="board-lock">LOCKED</button><button id="board-layout">Reset layout</button></div>
+        </section>
+        <button class="panel-resize" aria-label="Resize clothes panel" title="Drag to resize. Double-click for automatic height."></button>
+    </div>
+
+    <!-- бейджи активных режимов -->
+    <div id="modes"></div>
+
+    <!-- список команд (кнопка справа внизу, клик — при курсоре ~) -->
+    <div id="cmdbtn">CMDS</div>
+    <div id="cmdpanel" class="hidden">
+        <div id="cmdpanel-title">COMMANDS <span class="cmd-hint">click to type</span></div>
+        <div id="cmdlist"></div>
+        <div id="command-pagination" class="list-pagination hidden"><button id="command-page-prev" aria-label="Previous page">&larr;</button><span id="command-page-label"></span><button id="command-page-next" aria-label="Next page">&rarr;</button></div>
+    </div>
+
+    <!-- подсказки снизу -->
+    <div id="hints"></div>
+
+    <!-- тост -->
+    <div id="toast" class="hidden"></div>
+
+    <textarea id="clip" tabindex="-1"></textarea>
+    <script src="notifications.js"></script>
+    <script src="hud.js"></script>
+    <script src="panel-layout.js"></script>
+</body>
+</html>

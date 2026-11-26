@@ -1,0 +1,32 @@
+/* Content determines the default window height. Long lists use pages. */
+.studio-shell#menu, .studio-shell#clothboard { max-height: none; }
+.studio-main { flex: 1; }
+#menu-items, .wardrobe-grid { flex: none; max-height: none; overflow: visible; }
+.studio-footer { margin-top: auto; }
+.page-hidden { display: none !important; }
+.list-pagination { display: flex; align-items: center; justify-content: center; gap: 18px; flex: none; min-height: 34px; padding: 3px 15px; border-top: 1px solid #ffffff18; color: #aaa8a3; font: 10px Arial, sans-serif; }
+.list-pagination button { width: 31px; height: 27px; background: transparent; border: 1px solid #ffffff28; border-radius: 0; color: #eee9df; font: 15px Arial, sans-serif; cursor: pointer; }
+.list-pagination button:hover { background: #ffffff16; }
+.list-pagination button:disabled { opacity: .25; cursor: default; }
+.panel-grip { position: absolute; z-index: 3; top: 0; left: calc(50% - 25px); width: 50px; height: 10px; border: 0; border-radius: 0; background: transparent; cursor: move; touch-action: none; }
+.panel-grip::after { content: ''; position: absolute; top: 3px; left: 10px; width: 30px; height: 3px; background: #eee9df65; }
+.panel-grip:hover::after { background: #eee9df; }
+.studio-sidebar .studio-nav-item { padding-top: 19px; }
+.panel-resize { position: absolute; z-index: 3; right: 0; bottom: 0; width: 17px; height: 17px; border: 0; border-radius: 0; background: transparent; cursor: nwse-resize; touch-action: none; }
+.panel-resize::after { content: ''; position: absolute; width: 8px; height: 8px; right: 4px; bottom: 4px; border-right: 2px solid #eee9df80; border-bottom: 2px solid #eee9df80; }
+.panel-resize:hover::after { border-color: #eee9df; }
+body.panel-adjusting, body.panel-adjusting * { user-select: none !important; }
+.compact-rows .wardrobe-grid .strip { min-height: 39px; padding-top: 3px; padding-bottom: 3px; }
+.compact-rows .studio-heading, #clothboard.compact-rows #board-top { padding-top: 14px; padding-bottom: 14px; }
+.compact-rows .wardrobe-toolbar { padding-top: 6px; padding-bottom: 6px; }
+.compact-rows .studio-footer { min-height: 46px; padding-top: 6px; padding-bottom: 6px; }
+.narrow-panel .wardrobe-grid .strip { grid-template-columns: minmax(80px, 1fr) 25px 46px 25px 25px 38px 25px; gap: 4px; padding-left: 12px; padding-right: 12px; }
+.narrow-panel .wardrobe-grid .strip > button { width: 25px; }
+.narrow-panel .wardrobe-grid .strip .st-label { font-size: 12px; padding-right: 3px; }
+.narrow-panel .st-part, .narrow-panel .wardrobe-caption { display: none; }
+.narrow-panel .wardrobe-columns { grid-template-columns: minmax(80px, 1fr) 104px 96px; gap: 4px; padding-left: 12px; padding-right: 12px; }
+.narrow-panel .wardrobe-toolbar { padding-left: 12px; padding-right: 12px; }
+#clothboard.board-floating > .panel-grip, #clothboard.board-floating > .panel-resize, #clothboard.board-floating .list-pagination { display: none; }
+#cmdpanel { max-height: none; overflow: visible; }
+#cmdlist { max-height: none; overflow: visible; }
+@media (max-width: 650px) { .studio-shell#menu, .studio-shell#clothboard { max-height: none; } }
